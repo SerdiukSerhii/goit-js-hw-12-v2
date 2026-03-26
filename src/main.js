@@ -1,19 +1,19 @@
 import './css/css-loader.css';
+import './css/pagination.css';
 import { getImagesByQuery } from './js/pixabay-api';
 import {
   createGallery,
   clearGallery,
   showLoader,
   hideLoader,
-  showLoadMoreButton,
-  hideLoadMoreButton,
 } from './js/render-functions.js';
+
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
 const refs = {
   formElem: document.querySelector('.js-form'),
-  loadMoreBtn: document.querySelector('.js-load-more'),
+  paginationContainer: document.querySelector('.js-pagination'),
 };
 
 const PER_PAGE = 15;
@@ -22,7 +22,41 @@ let page = 1;
 let currentQuery = '';
 let totalPages = 0;
 
-//! ============= event ==========================
+//! =========== Pagination helper functions ===========
+
+function getPagination(currentPage, totalPages) {
+  const pages = [];
+  const delta = 1;
+  const rangeStart = Math.max(2, currentPage - delta);
+  const rangeEnd = Math.min(totalPages - 1, currentPage + delta);
+
+  pages.push(1);
+  if (rangeStart > 2) pages.push('...');
+  for (let i = rangeStart; i <= rangeEnd; i++) pages.push(i);
+  if (rangeEnd < totalPages - 1) pages.push('...');
+  if (totalPages > 1) pages.push(totalPages);
+
+  return pages;
+}
+
+function renderPagination(currentPage, totalPages) {
+  const pages = getPagination(currentPage, totalPages);
+
+  const markup = pages
+    .map(p => {
+      if (p === '...') return `<span class="dots">...</span>`;
+      return `<button class="page-btn ${p === currentPage ? 'active' : ''}" data-page="${p}">${p}</button>`;
+    })
+    .join('');
+
+  refs.paginationContainer.innerHTML = markup;
+  console.log(refs.paginationContainer);
+}
+
+//!===========================================================
+
+//! ============= submit ======================================
+
 refs.formElem.addEventListener('submit', async e => {
   e.preventDefault();
 
@@ -42,7 +76,6 @@ refs.formElem.addEventListener('submit', async e => {
   page = 1;
 
   clearGallery();
-  hideLoadMoreButton();
   showLoader();
 
   try {
@@ -58,21 +91,22 @@ refs.formElem.addEventListener('submit', async e => {
         color: '#98a8d4ff',
         icon: false,
       });
+
+      refs.paginationContainer.innerHTML = '';
+
       return;
     }
 
     createGallery(data.hits);
+    renderPagination(page, totalPages);
 
     if (page >= totalPages) {
-      hideLoadMoreButton();
       iziToast.info({
         message: "We're sorry, but you've reached the end of search results.",
         position: 'topRight',
       });
       return;
     }
-
-    showLoadMoreButton();
   } catch {
     iziToast.error({
       message: 'Error fetching images. Please try again later.',
@@ -86,43 +120,26 @@ refs.formElem.addEventListener('submit', async e => {
   refs.formElem.reset();
 });
 
-// !============= btn load more ==========================
+//! =========== Click on pagination ===========
+refs.paginationContainer.addEventListener('click', async e => {
+  if (!e.target.classList.contains('page-btn')) return;
 
-refs.loadMoreBtn.addEventListener('click', async () => {
-  page += 1;
-  hideLoadMoreButton();
+  const selectedPage = Number(e.target.dataset.page);
+  page = selectedPage;
+  clearGallery();
   showLoader();
 
   try {
     const data = await getImagesByQuery(currentQuery, page);
 
     createGallery(data.hits);
+    renderPagination(page, totalPages);
 
-    // ================= scroll========================
-    const elem = document.querySelector('.gallery-item:last-child');
-    if (elem) {
-      const cardHeight = elem.getBoundingClientRect().height;
-
-      window.scrollBy({
-        top: cardHeight * 2,
-        behavior: 'smooth',
-      });
-    }
-    // =====================================================
-
-    if (page >= totalPages) {
-      iziToast.info({
-        message: "We're sorry, but you've reached the end of search results.",
-        position: 'topRight',
-      });
-    } else {
-      showLoadMoreButton();
-    }
+    document
+      .querySelector('.js-gallery')
+      .scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch {
-    iziToast.error({
-      message: 'Error fetching more images.',
-      position: 'topRight',
-    });
+    iziToast.error({ message: 'Error loading page', position: 'topRight' });
   } finally {
     hideLoader();
   }
