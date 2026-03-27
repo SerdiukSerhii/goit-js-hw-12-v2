@@ -1,5 +1,4 @@
 import './css/css-loader.css';
-import './css/pagination.css';
 import { getImagesByQuery } from './js/pixabay-api';
 import {
   createGallery,
@@ -8,6 +7,7 @@ import {
   hideLoader,
   showPagination,
   hidePagination,
+  renderPagination,
 } from './js/render-functions.js';
 
 import iziToast from 'izitoast';
@@ -23,39 +23,6 @@ const PER_PAGE = 15;
 let page = 1;
 let currentQuery = '';
 let totalPages = 0;
-
-//! =========== Pagination helper functions ===========
-
-function getPagination(currentPage, totalPages) {
-  const pages = [];
-  const delta = 1;
-  const rangeStart = Math.max(2, currentPage - delta);
-  const rangeEnd = Math.min(totalPages - 1, currentPage + delta);
-
-  pages.push(1);
-  if (rangeStart > 2) pages.push('...');
-  for (let i = rangeStart; i <= rangeEnd; i++) pages.push(i);
-  if (rangeEnd < totalPages - 1) pages.push('...');
-  if (totalPages > 1) pages.push(totalPages);
-
-  return pages;
-}
-
-function renderPagination(currentPage, totalPages) {
-  const pages = getPagination(currentPage, totalPages);
-
-  const markup = pages
-    .map(p => {
-      if (p === '...') return `<span class="dots">...</span>`;
-      return `<button class="page-btn ${p === currentPage ? 'active' : ''}" data-page="${p}">${p}</button>`;
-    })
-    .join('');
-
-  refs.paginationContainer.innerHTML = markup;
-  console.log(refs.paginationContainer);
-}
-
-//!===========================================================
 
 //! ============= submit ======================================
 

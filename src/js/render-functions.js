@@ -1,4 +1,6 @@
 import '../css/gallery.css';
+import '../css/pagination.css';
+import { getPagination } from './pagination.js';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
@@ -47,6 +49,23 @@ export function createGallery(images) {
   galleryContainer.insertAdjacentHTML('beforeend', galleryMarkup);
   lightbox.refresh();
 }
+
+// !================ pagination markup ================
+
+export function renderPagination(currentPage, totalPages) {
+  const pages = getPagination(currentPage, totalPages);
+
+  const markup = pages
+    .map(p => {
+      if (p === '...') return `<span class="dots">...</span>`;
+      return `<button class="page-btn ${p === currentPage ? 'active' : ''}" data-page="${p}">${p}</button>`;
+    })
+    .join('');
+
+  paginationElem.innerHTML = markup;
+}
+
+// !========================================================
 
 export function clearGallery() {
   galleryContainer.innerHTML = '';
