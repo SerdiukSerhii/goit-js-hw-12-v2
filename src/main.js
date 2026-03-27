@@ -6,6 +6,8 @@ import {
   clearGallery,
   showLoader,
   hideLoader,
+  showPagination,
+  hidePagination,
 } from './js/render-functions.js';
 
 import iziToast from 'izitoast';
@@ -76,6 +78,7 @@ refs.formElem.addEventListener('submit', async e => {
   page = 1;
 
   clearGallery();
+  hidePagination();
   showLoader();
 
   try {
@@ -99,6 +102,7 @@ refs.formElem.addEventListener('submit', async e => {
 
     createGallery(data.hits);
     renderPagination(page, totalPages);
+    showPagination();
 
     if (page >= totalPages) {
       iziToast.info({
@@ -127,6 +131,7 @@ refs.paginationContainer.addEventListener('click', async e => {
   const selectedPage = Number(e.target.dataset.page);
   page = selectedPage;
   clearGallery();
+  hidePagination();
   showLoader();
 
   try {
@@ -134,6 +139,7 @@ refs.paginationContainer.addEventListener('click', async e => {
 
     createGallery(data.hits);
     renderPagination(page, totalPages);
+    showPagination();
 
     document
       .querySelector('.js-gallery')

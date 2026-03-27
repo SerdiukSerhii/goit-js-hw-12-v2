@@ -4,6 +4,7 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const galleryContainer = document.querySelector('.js-gallery');
 const loaderElem = document.querySelector('.loader');
+const paginationElem = document.querySelector('.js-pagination');
 
 const lightbox = new SimpleLightbox('.js-gallery a', {
   captions: true,
@@ -57,4 +58,12 @@ export function showLoader() {
 
 export function hideLoader() {
   loaderElem.classList.remove('is-visible');
+}
+
+export function showPagination() {
+  paginationElem.classList.remove('is-hidden');
+}
+
+export function hidePagination() {
+  paginationElem.classList.add('is-hidden');
 }

@@ -7,6 +7,10 @@
   flex-wrap: wrap;
 }
 
+.pagination-container.is-hidden {
+  display: none;
+}
+
 .page-btn {
   min-width: 36px;
   height: 36px;
@@ -27,7 +31,6 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   transform: scale(1.1);
 }
-
 
 .page-btn.active {
   background-color: #4e75ff;
